@@ -1,0 +1,45 @@
+function [I_SegmentSkin,I_NoSkin] = segmentSkin(I);
+
+% %%%%%%%%%%%%%%%%%%%%
+% I = imread('latex5.png');
+% I = segmentGlove(I);
+
+%%%%%%%%%%%%%%%%
+
+% Convert to YCbCr color space
+ycbcr_img = rgb2ycbcr(I);
+
+% Define the skin color range in the CbCr plane
+Cb_range = [105 127];
+Cr_range = [150 173];
+
+% Create a binary mask for the skin color region
+Cb = ycbcr_img(:,:,2);
+Cr = ycbcr_img(:,:,3);
+skin_mask = (Cb >= Cb_range(1)) & (Cb <= Cb_range(2)) & (Cr >= Cr_range(1)) & (Cr <= Cr_range(2));
+
+% Clean up the binary mask
+se = strel('disk', 5);
+skin_mask = imdilate(skin_mask, se);
+skin_mask = imfill(skin_mask, 'holes');
+skin_mask = imerode(skin_mask, strel('disk', 5));
+skin_mask = imclose(skin_mask,strel('disk',13));
+skin_mask = imfill(skin_mask, 'holes');
+skin_mask = imdilate(skin_mask, se);
+skin_mask = imerode(skin_mask, strel('disk', 2));
+% imshow(skin_mask);
+
+% Extract the skin-colored pixels
+skin_pixels = I;
+skin_pixels(repmat(~skin_mask, [1 1 3])) = 0;
+
+noskin_pixels = I;
+skin_mask = imcomplement(skin_mask);
+noskin_pixels(repmat(~skin_mask, [1 1 3])) = 0;
+
+% imshow(noskin_pixels);
+% Show the result
+% subplot(1,2,1);imshow(I);
+% subplot(1,2,2);imshow(skin_pixels);
+I_SegmentSkin = skin_pixels;
+I_NoSkin = noskin_pixels;

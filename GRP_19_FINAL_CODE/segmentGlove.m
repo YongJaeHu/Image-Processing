@@ -1,0 +1,46 @@
+function I_segmented = segmentGlove(I)
+% Load an example image
+%%%%%%%%%%%%%%
+% I = imread('latex96.png');
+%%%%%%%%%%%%%%%%%
+
+
+% Convert the image to grayscale
+I_gray = rgb2gray(I);
+I_gray = imsharpen(I_gray);
+% Apply thresholding to segment the object from the background
+I_binary = im2bw(I_gray,graythresh(I_gray));
+%subplot(2,2,1); imshow(I_binary);
+
+% Fill in any holes in the object using morphological closing
+se = strel('disk',14);
+I_closed = imclose(I_binary, se);
+I_closed = imfill(I_closed, 'holes');
+% subplot(2,2,3); imshow(I_closed)
+
+% Remove small objects from the binary image using morphological opening
+se = strel('disk', 8);
+I_opened = imopen(I_closed, se);
+% subplot(2,2,4); imshow(I_opened);
+
+%%%% Extract the object from the original image using the binary mask
+%I_object = bsxfun(@times, I, cast(I_opened, 'like', I));
+% Create a binary mask from the edge image
+mask = double(I_opened);
+% Set the pixel values outside the mask to NaN
+mask(mask==0) = NaN;
+% Multiply the original image with the mask to get the segmented image
+I_segmented = I .* repmat(uint8(mask), [1 1 3]);
+% Show the original image and the segmented image side by side
+% subplot(2,2,1); imshow(I);
+% subplot(2,2,2); imshow(I_segmented);
+
+%%%Extract
+% Display the original image and the segmented object side by side
+% figure;
+% subplot(1,2,1);
+% imshow(I);
+% title('Original Image');
+% subplot(1,2,2);
+% imshow(I_object);
+% title('I_Segmented');

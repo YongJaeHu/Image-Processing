@@ -1,0 +1,51 @@
+function identifyStains(I_stains,I);
+S_grey = rgb2gray(I_stains);
+% subplot(2,3,1); imshow(S_grey);
+
+S_binary = im2bw(S_grey,graythresh(S_grey));
+% subplot(2,3,2); imshow(S_binary);
+
+% S_edge = edge(uint8(S_binary));
+% subplot(2,3,3); imshow(S_edge);
+% 
+% se = strel('square',4);
+% S_outlined = imdilate(S_edge,se);
+% subplot(2,3,4); imshow(S_outlined);
+% 
+% S_filled = imfill(S_outlined,'holes');
+% subplot(2,3,5); imshow(S_filled);
+
+[label num] = bwlabel(S_binary);
+disp(num);
+I_props = regionprops(label);
+I_box = [I_props.BoundingBox];
+I_box = reshape(I_box,4,[]);
+[rows, cols] = size(I);
+% subplot(2,3,6); imshow(img);
+% subplot(2,2,1);
+% imshow(S_binary);
+% subplot(2,2,2);
+% imshow(I);
+
+hold on;
+try
+    for cnt = 1:5
+        dimension = I_box(:,cnt);%x-y-width-height
+        disp(di)
+        %%%dun let it detect x axis most left and right
+        if (rows - (dimension(1)) < 50)
+            continue;
+        elseif (dimension(1) < 50)
+            continue;
+        %%%ignore if really really small
+        elseif (dion(3) <35)
+            continue;
+        elseif (dimension(4) <35)
+            continue;
+        end
+        rectangle('position',I_box(:,cnt),'edgecolor','r');
+        text(I_box(1,cnt), I_box(2,cnt)-20, "stain" , 'Color', 'r', 'FontSize', 12);
+    end
+catch
+    ;
+end
